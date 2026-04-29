@@ -16,7 +16,7 @@ class CalculatorUtils {
   }
 
   static Map<String, double> calculateForward(double amount) {
-    final net = amount / (1 + whtRate);
+    final net = amount * (1 - whtRate);
     final tax = amount - net;
     return {
       'net': net,
@@ -26,7 +26,7 @@ class CalculatorUtils {
   }
 
   static Map<String, double> calculateReverse(double desiredNet) {
-    final required = desiredNet * (1 + whtRate);
+    final required = desiredNet / (1 - whtRate);
     final tax = required - desiredNet;
     return {
       'net': desiredNet,

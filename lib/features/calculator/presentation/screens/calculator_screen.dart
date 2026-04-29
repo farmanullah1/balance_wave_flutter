@@ -8,6 +8,8 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'dart:math' as math;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../shared/widgets/carrier_logo.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -26,6 +28,7 @@ class CalculatorScreen extends ConsumerStatefulWidget {
 class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   late AnimationController _bgAnimationController;
 
   @override
@@ -41,8 +44,28 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
   void dispose() {
     _mobileController.dispose();
     _amountController.dispose();
+    _scrollController.dispose();
     _bgAnimationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $url')),
+        );
+      }
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutQuart,
+    );
   }
 
   @override
@@ -62,6 +85,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
             _buildBackground(),
             SafeArea(
               child: SingleChildScrollView(
+                controller: _scrollController,
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,6 +114,10 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
                           .animate()
                           .fadeIn(duration: 800.ms, delay: 800.ms),
                     SizedBox(height: 5.h),
+                    _buildFooter()
+                        .animate()
+                        .fadeIn(duration: 800.ms, delay: 1000.ms),
+                    SizedBox(height: 4.h),
                   ],
                 ),
               ),
@@ -140,36 +168,120 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
   }
 
   Widget _buildHeader() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Row(
+        children: [
+          _buildAppLogo(),
+          SizedBox(width: 3.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Color(0xFF6366F1), Color(0xFF06B6D4), Color(0xFF10B981)],
+                  ).createShader(bounds),
+                  child: Text(
+                    'BalanceWave',
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+                    .animate(onPlay: (c) => c.repeat(reverse: true))
+                    .shimmer(duration: 3000.ms, color: Colors.white.withValues(alpha: 0.15)),
+                SizedBox(height: 0.3.h),
+                Text(
+                  'Smart Tax Calculator',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 11.sp,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: const Icon(LucideIcons.waves, color: Colors.white, size: 28),
+          _buildPortfolioButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppLogo() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6366F1), Color(0xFF06B6D4)],
         ),
-        SizedBox(width: 4.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'BalanceWave',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 22.sp),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Icon(LucideIcons.waves, color: Colors.white, size: 24),
+      ),
+    ).animate(onPlay: (c) => c.repeat(reverse: true))
+        .scaleXY(begin: 1, end: 1.05, duration: 2000.ms, curve: Curves.easeInOut);
+  }
+
+  Widget _buildPortfolioButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _launchUrl('https://farmanullah1.github.io/My-Portfolio/'),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.08),
+                Colors.white.withValues(alpha: 0.03),
+              ],
             ),
-            Text(
-              'Smart Tax Calculator',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13.sp),
-            ),
-          ],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.briefcase, color: Colors.white70, size: 15.sp),
+              SizedBox(width: 1.5.w),
+              Text(
+                'Portfolio',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(width: 1.w),
+              Icon(LucideIcons.external_link, color: Colors.white30, size: 11.sp),
+            ],
+          ),
         ),
-        const Spacer(),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(LucideIcons.settings, color: Colors.white54),
-        ),
-      ],
+      ),
     );
   }
 
@@ -177,8 +289,9 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Row(
         children: [
@@ -238,7 +351,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
               style: TextStyle(fontSize: 16.sp),
               decoration: InputDecoration(
                 hintText: state.mode == CalculationMode.forward ? '100' : '86.96',
-                helperText: 'after 15% WHT on net balance',
+                helperText: 'after 15% WHT deduction',
                 helperStyle: TextStyle(color: Colors.white24, fontSize: 11.sp),
                 prefixIcon: Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -261,28 +374,48 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
                         notifier.calculate();
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 8,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
                 ),
-                child: state.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(state.mode == CalculationMode.forward ? LucideIcons.zap : LucideIcons.target, size: 20),
-                          SizedBox(width: 2.w),
-                          Text(
-                            state.mode == CalculationMode.forward ? 'Calculate Balance' : 'Calculate Recharge',
-                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF06B6D4)],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
+                    ],
+                  ),
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: 7.h,
+                    child: state.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(state.mode == CalculationMode.forward ? LucideIcons.zap : LucideIcons.target, size: 20),
+                              SizedBox(width: 2.w),
+                              Text(
+                                state.mode == CalculationMode.forward ? 'Calculate Balance' : 'Calculate Recharge',
+                                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -420,8 +553,16 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
                     child: Text(
                       'Rs. ${isReverse ? result['amount']!.toStringAsFixed(2) : result['net']!.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            fontSize: 28.sp,
-                            color: Theme.of(context).primaryColor,
+                            fontSize: 30.sp,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                            foreground: Paint()
+                              ..shader = LinearGradient(
+                                colors: [
+                                  Theme.of(context).primaryColor,
+                                  Colors.tealAccent,
+                                ],
+                              ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
                           ),
                     ),
                   ),
@@ -455,7 +596,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
               ),
               SizedBox(height: 1.5.h),
               _buildBreakdownRow(
-                'WHT (15% on net):',
+                'WHT (15%):',
                 '${isReverse ? "+" : "−"} Rs. ${result['tax']!.toStringAsFixed(2)}',
                 valueColor: isReverse ? Colors.orange : Colors.redAccent,
               ),
@@ -581,6 +722,238 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
       ),
     );
   }
+
+  Widget _buildFooter() {
+    return Column(
+      children: [
+        const Divider(color: Colors.white10),
+        SizedBox(height: 4.h),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF6366F1), Color(0xFF06B6D4)],
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(LucideIcons.waves, color: Colors.white, size: 16),
+                        ),
+                      ),
+                      SizedBox(width: 2.w),
+                      ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Color(0xFF6366F1), Color(0xFF06B6D4)],
+                        ).createShader(bounds),
+                        child: Text(
+                          'BalanceWave',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    'Your smart & reliable mobile balance tax calculator for Pakistan. Built with precision for the 2026 tax regulations.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 13.sp,
+                      height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 3.h),
+                  Wrap(
+                    spacing: 3.w,
+                    runSpacing: 2.h,
+                    children: [
+                      _buildFooterSocialIcon(_buildBrandIcon('github'), 'https://github.com/farmanullah1'),
+                      _buildFooterSocialIcon(_buildBrandIcon('linkedin'), 'https://linkedin.com/in/farmanullah1'),
+                      _buildFooterSocialIcon(_buildBrandIcon('twitter'), 'https://twitter.com/farmanullah1'),
+                      _buildFooterSocialIcon(const Icon(LucideIcons.mail, color: Colors.white70, size: 18), 'mailto:contact@farmanullah.com'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'Resources',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                _buildFooterLink(LucideIcons.briefcase, 'Portfolio', 'https://farmanullah1.github.io/My-Portfolio/'),
+                _buildFooterLink(LucideIcons.globe, 'API Docs', '#'),
+                _buildFooterLink(LucideIcons.code, 'Open Source', '#'),
+                SizedBox(height: 2.h),
+                InkWell(
+                  onTap: _scrollToTop,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.2.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(LucideIcons.arrow_up, color: Colors.white, size: 16),
+                        SizedBox(width: 2.w),
+                        Text(
+                          'Top',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        SizedBox(height: 6.h),
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 3.h),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.white10)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '© ${DateTime.now().year} BalanceWave. Designed & Developed by Farmanullah Ansari.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      _buildBadge('v2.0.0'),
+                      SizedBox(width: 2.w),
+                      _buildBadge('Pakistan 2026'),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooterSocialIcon(Widget icon, String url) {
+    return InkWell(
+      onTap: () => _launchUrl(url),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: icon,
+      ),
+    );
+  }
+
+  Widget _buildBrandIcon(String name, {double size = 20, Color color = Colors.white70}) {
+    String svgData;
+    switch (name) {
+      case 'github':
+        svgData =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>';
+        break;
+      case 'linkedin':
+        svgData =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>';
+        break;
+      case 'twitter':
+        svgData =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>';
+        break;
+      default:
+        return Icon(LucideIcons.info, size: size, color: color);
+    }
+    return SvgPicture.string(
+      svgData,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+  }
+
+  Widget _buildFooterLink(IconData icon, String label, String url) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 1.5.h),
+      child: InkWell(
+        onTap: url == '#' ? null : () => _launchUrl(url),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white38, size: 14),
+            SizedBox(width: 2.w),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 13.sp,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadge(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white54,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
 }
 
 class _ModeButton extends StatelessWidget {
@@ -602,10 +975,25 @@ class _ModeButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isActive ? Theme.of(context).primaryColor : Colors.transparent,
+          gradient: isActive
+              ? const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+                )
+              : null,
+          color: isActive ? null : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

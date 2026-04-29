@@ -21,6 +21,7 @@ dependencies:
   flutter_lucide: ^1.0.4
   intl: ^0.19.0
   flutter_staggered_animations: ^1.0.0
+  url_launcher: ^6.3.0
   shared_preferences: ^2.2.3
   responsive_sizer: ^3.3.1
 
@@ -50,3 +51,4 @@ flutter:
   assets:
     - assets/logos/
     - assets/images/
+    - assets/carriers/
