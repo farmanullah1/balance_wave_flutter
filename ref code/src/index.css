@@ -1,0 +1,169 @@
+/* BalanceWave — Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Skin: Default (Ocean Blue / Pink) ── */
+:root {
+  --bg:        #E8EEF5;
+  --surface:   rgba(255,255,255,0.62);
+  --border:    rgba(255,255,255,0.88);
+  --text:      #1A2540;
+  --muted:     #5E6E8A;
+  --accent:    #00B4D8;
+  --wave:      #0077B6;
+  --glow:      #48CAE4;
+  --success:   #06D6A0;
+  --danger:    #F72585;
+  --warn:      #FFB703;
+  --sdark:     #BDC8DA;
+  --slight:    #F5F9FF;
+  --blob-a:    #48CAE4;
+  --blob-b:    #F72585;
+  --grad-from: #00B4D8;
+  --grad-to:   #7b2ff7;
+}
+
+/* ── Skin: Sunset ── */
+[data-skin="sunset"] {
+  --bg:        #F5EEE8;
+  --surface:   rgba(255,252,248,0.68);
+  --border:    rgba(255,255,255,0.9);
+  --text:      #2B1A0A;
+  --muted:     #8A6E5E;
+  --accent:    #F4845F;
+  --wave:      #F72585;
+  --glow:      #FFBE0B;
+  --success:   #06D6A0;
+  --danger:    #d62828;
+  --warn:      #FFBE0B;
+  --sdark:     #DAC8BD;
+  --slight:    #FFF8F5;
+  --blob-a:    #F4845F;
+  --blob-b:    #FFBE0B;
+  --grad-from: #F4845F;
+  --grad-to:   #F72585;
+}
+
+/* ── Skin: Forest ── */
+[data-skin="forest"] {
+  --bg:        #E8F5EE;
+  --surface:   rgba(240,252,246,0.65);
+  --border:    rgba(255,255,255,0.88);
+  --text:      #0D2B1A;
+  --muted:     #4A7260;
+  --accent:    #06D6A0;
+  --wave:      #118577;
+  --glow:      #56CFBA;
+  --success:   #06D6A0;
+  --danger:    #F72585;
+  --warn:      #FFB703;
+  --sdark:     #BDD9C8;
+  --slight:    #F5FFF8;
+  --blob-a:    #06D6A0;
+  --blob-b:    #118577;
+  --grad-from: #06D6A0;
+  --grad-to:   #0077B6;
+}
+
+/* ── Skin: Violet ── */
+[data-skin="violet"] {
+  --bg:        #EEE8F5;
+  --surface:   rgba(250,248,255,0.65);
+  --border:    rgba(255,255,255,0.9);
+  --text:      #1A0A2B;
+  --muted:     #6E5E8A;
+  --accent:    #7b2ff7;
+  --wave:      #5a1ed4;
+  --glow:      #b48fff;
+  --success:   #06D6A0;
+  --danger:    #F72585;
+  --warn:      #FFB703;
+  --sdark:     #CEC0DA;
+  --slight:    #F8F5FF;
+  --blob-a:    #b48fff;
+  --blob-b:    #F72585;
+  --grad-from: #7b2ff7;
+  --grad-to:   #F72585;
+}
+
+/* ── Dark mode (overlay on any skin) ── */
+[data-theme="dark"] {
+  --bg:        #0A1628;
+  --surface:   rgba(16,30,58,0.72);
+  --border:    rgba(255,255,255,0.07);
+  --text:      #E8F1FF;
+  --muted:     #7A90B5;
+  --sdark:     #040D1E;
+  --slight:    #1A2E52;
+}
+[data-theme="dark"][data-skin="sunset"] {
+  --bg:        #1C0A00;
+  --surface:   rgba(38,16,6,0.72);
+  --border:    rgba(255,180,100,0.08);
+  --text:      #FFF0E5;
+  --muted:     #B5907A;
+  --sdark:     #0D0400;
+  --slight:    #2E1A0A;
+}
+[data-theme="dark"][data-skin="forest"] {
+  --bg:        #001C0A;
+  --surface:   rgba(5,30,18,0.72);
+  --border:    rgba(6,214,160,0.08);
+  --text:      #E5FFF2;
+  --muted:     #5A8A70;
+  --sdark:     #000D04;
+  --slight:    #0A2E18;
+}
+[data-theme="dark"][data-skin="violet"] {
+  --bg:        #0A001C;
+  --surface:   rgba(20,10,44,0.72);
+  --border:    rgba(180,143,255,0.08);
+  --text:      #F2E5FF;
+  --muted:     #907AB5;
+  --sdark:     #040010;
+  --slight:    #1A0A2E;
+}
+
+html {
+  transition: background 0.45s, color 0.45s;
+}
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.45s ease, color 0.45s ease;
+}
+
+/* ── Keyframes ── */
+@keyframes drift {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(6vw,7vh) scale(1.12); }
+}
+@keyframes wavebar {
+  0%,100% { transform: scaleY(0.55); opacity: 0.45; }
+  50%     { transform: scaleY(1.2);  opacity: 1; }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes waveMove {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes pop {
+  0%   { transform: scale(0.88); opacity: 0; }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1);    opacity: 1; }
+}
