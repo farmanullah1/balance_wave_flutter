@@ -1,5 +1,6 @@
-package com.example.balance_wave_flutter
+package com.farman.balancewave
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+

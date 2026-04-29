@@ -1,5 +1,5 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:glassmorphism/glassmorphism.dart';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
@@ -16,35 +16,49 @@ class GlassCard extends StatelessWidget {
     this.height,
     this.borderRadius = 24,
     this.blur = 15,
-    this.border = 1.5,
+    this.border = 1.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GlassmorphicContainer(
-      width: width ?? double.infinity,
-      height: height ?? double.infinity,
-      borderRadius: borderRadius,
-      blur: blur,
-      alignment: Alignment.center,
-      border: border,
-      linearGradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.white.withValues(alpha: 0.1),
-          Colors.white.withValues(alpha: 0.05),
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
         ],
       ),
-      borderGradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.white.withValues(alpha: 0.5),
-          Colors.white.withValues(alpha: 0.2),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(borderRadius),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: border,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.1),
+                  Colors.white.withValues(alpha: 0.02),
+                ],
+              ),
+            ),
+            child: child,
+          ),
+        ),
       ),
-      child: child,
     );
   }
 }

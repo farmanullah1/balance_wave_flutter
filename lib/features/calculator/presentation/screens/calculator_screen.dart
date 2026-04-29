@@ -12,8 +12,8 @@ import 'dart:math' as math;
 import '../../../../shared/widgets/carrier_logo.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../core/constants/carriers.dart';
-import '../domain/carrier.dart';
-import '../domain/history_entry.dart';
+import '../../domain/carrier.dart';
+import '../../domain/history_entry.dart';
 import '../providers/calculator_provider.dart';
 
 class CalculatorScreen extends ConsumerStatefulWidget {
@@ -238,6 +238,8 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
               style: TextStyle(fontSize: 16.sp),
               decoration: InputDecoration(
                 hintText: state.mode == CalculationMode.forward ? '100' : '86.96',
+                helperText: 'after 15% WHT on net balance',
+                helperStyle: TextStyle(color: Colors.white24, fontSize: 11.sp),
                 prefixIcon: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Text('Rs.', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 15.sp)),
@@ -253,7 +255,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
                 onPressed: state.isLoading
                     ? null
                     : () async {
-                        if (await Vibration.hasVibrator() ?? false) {
+                        if (await Vibration.hasVibrator()) {
                           Vibration.vibrate(duration: 50);
                         }
                         notifier.calculate();
@@ -350,7 +352,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(LucideIcons.bar_chart_3, size: 40, color: Colors.white24),
+          const Icon(LucideIcons.trending_up, size: 40, color: Colors.white24),
           SizedBox(height: 2.h),
           Text(
             'Fill in the form to calculate\nyour net balance',
@@ -430,6 +432,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
                           : 'Net Balance: Rs. ${result['net']!.toStringAsFixed(2)}\nWHT: Rs. ${result['tax']!.toStringAsFixed(2)}\nRecharge: Rs. ${result['amount']!.toStringAsFixed(2)}';
                       
                       Clipboard.setData(ClipboardData(text: text)).then((_) {
+                        if (!mounted) return;
                         Vibration.vibrate(pattern: [0, 40, 20, 40]);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -516,7 +519,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> with Single
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.history.length,
-            separatorBuilder: (_, __) => SizedBox(height: 1.5.h),
+            separatorBuilder: (_, _) => SizedBox(height: 1.5.h),
             itemBuilder: (context, index) {
               final item = state.history[index];
               return AnimationConfiguration.staggeredList(

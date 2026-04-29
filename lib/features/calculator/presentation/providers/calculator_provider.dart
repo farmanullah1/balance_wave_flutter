@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:flutter_riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/utils/calculator_utils.dart';
-import '../domain/carrier.dart';
-import '../domain/history_entry.dart';
+import '../../../../core/utils/calculator_utils.dart';
+import '../../domain/carrier.dart';
+import '../../domain/history_entry.dart';
 
 class CalculatorState {
   final String mobileNumber;
@@ -47,7 +47,7 @@ class CalculatorState {
 
 class CalculatorNotifier extends Notifier<CalculatorState> {
   static const int maxHistory = 8;
-  late SharedPreferences _prefs;
+  SharedPreferences? _prefs;
 
   @override
   CalculatorState build() {
@@ -57,7 +57,7 @@ class CalculatorNotifier extends Notifier<CalculatorState> {
 
   Future<void> _init() async {
     _prefs = await SharedPreferences.getInstance();
-    final historyJson = _prefs.getString('bw-history');
+    final historyJson = _prefs?.getString('bw-history');
     if (historyJson != null) {
       final List<dynamic> decoded = jsonDecode(historyJson);
       state = state.copyWith(
@@ -68,7 +68,7 @@ class CalculatorNotifier extends Notifier<CalculatorState> {
 
   Future<void> _saveHistory(List<HistoryEntry> history) async {
     final historyJson = jsonEncode(history.map((e) => e.toJson()).toList());
-    await _prefs.setString('bw-history', historyJson);
+    await _prefs?.setString('bw-history', historyJson);
   }
 
   void setMobileNumber(String value) {
@@ -133,7 +133,7 @@ class CalculatorNotifier extends Notifier<CalculatorState> {
   }
 
   void clearHistory() async {
-    await _prefs.remove('bw-history');
+    await _prefs?.remove('bw-history');
     state = state.copyWith(history: []);
   }
 

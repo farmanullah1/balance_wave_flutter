@@ -1,5 +1,5 @@
 import '../constants/carriers.dart';
-import '../../models/carrier.dart';
+import '../../features/calculator/domain/carrier.dart';
 
 class CalculatorUtils {
   static const double whtRate = 0.15;
