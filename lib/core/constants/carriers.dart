@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/carrier.dart';
+import '../../features/calculator/domain/carrier.dart';
 
 class CarrierConstants {
   static const List<Carrier> carriers = [

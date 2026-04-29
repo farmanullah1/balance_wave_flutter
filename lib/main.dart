@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'core/theme/app_theme.dart';
-import 'providers/calculator_provider.dart';
-import 'screens/calculator_screen.dart';
+import 'core/router/app_router.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CalculatorProvider()),
-      ],
-      child: const BalanceWaveApp(),
+    const ProviderScope(
+      child: BalanceWaveApp(),
     ),
   );
 }
@@ -20,11 +18,15 @@ class BalanceWaveApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BalanceWave',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      home: const CalculatorScreen(),
+    return ResponsiveSizer(
+      builder: (context, orientation, screenType) {
+        return MaterialApp.router(
+          title: 'BalanceWave',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.darkTheme,
+          routerConfig: appRouter,
+        );
+      },
     );
   }
 }
